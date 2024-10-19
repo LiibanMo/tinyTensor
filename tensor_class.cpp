@@ -115,7 +115,7 @@ class Tensor{
         }
 
         double std(){
-            return pow((*this).var(), 0.5);
+            return std::pow((*this).var(), 0.5);
         }
 };
 
