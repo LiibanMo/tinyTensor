@@ -1,13 +1,15 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
+template <typename Type>
 class Tensor{
     private:
-        const std::vector<double> tensor;
+        const std::vector<Type> tensor;
         std::vector<int> shape;
     public:
-        Tensor(const std::vector<double>& input_data, const std::vector<int>& input_shape) : tensor(input_data), shape(input_shape) {}
+        Tensor(const std::vector<Type>& input_data, const std::vector<int>& input_shape) : tensor(input_data), shape(input_shape) {}
         
         void print(){
             const int N = shape[0];
@@ -31,7 +33,7 @@ class Tensor{
         // Defining operators
 
         Tensor operator+ (const Tensor& other_tensor){
-            std::vector<double> result;
+            std::vector<Type> result;
             for (int i = 0; i < tensor.size(); i++){
                 result.push_back(tensor[i] + other_tensor.tensor[i]);
             }
@@ -39,7 +41,7 @@ class Tensor{
         }
 
         Tensor operator- (const Tensor& other_tensor){
-            std::vector<double> result;
+            std::vector<Type> result;
             for (int i = 0; i < tensor.size(); i++){
                 result.push_back(tensor[i] - other_tensor.tensor[i]);
             }
@@ -47,7 +49,7 @@ class Tensor{
         }
 
         Tensor operator* (const double& multiplier){
-            std::vector<double> result;
+            std::vector<Type> result;
             for (double component : tensor){
                 result.push_back(component * multiplier);
             }
@@ -59,7 +61,7 @@ class Tensor{
             const int M = shape[1];
             const int P = other_tensor.shape[1];
 
-            std::vector<double> result_tensor;
+            std::vector<Type> result_tensor;
 
             for (int i = 0; i < N; ++i){
                 for (int j = 0; j < P; j++){
@@ -75,7 +77,7 @@ class Tensor{
         }
 
         Tensor operator/ (const double& divisor){
-            std::vector<double> result;
+            std::vector<Type> result;
             for (double component : tensor){
                 result.push_back(component / divisor);
             }
@@ -87,6 +89,33 @@ class Tensor{
         Tensor T(){
             std::reverse(shape.begin(), shape.end());
             return *this;
+        }
+        double sum(){
+            double result = 0;
+            for (double component : tensor){
+                result += component;
+            }
+            return result;
+        }
+
+        double mean(){
+            double result = 0;
+            for (double component : tensor){
+                result += component;
+            }
+            return result / tensor.size();
+        }
+        
+        double var(){
+            double result = 0;
+            for (double component : tensor){
+                result += std::pow((component - (*this).mean()), 2);
+            }
+            return result / (tensor.size() - 1);
+        }
+
+        double std(){
+            return pow((*this).var(), 0.5);
         }
 };
 
