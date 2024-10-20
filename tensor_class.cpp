@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
 template <typename Type>
 class Tensor{
@@ -106,6 +107,38 @@ class Tensor{
             return result / tensor.size();
         }
         
+        Tensor mean(const int& axis){
+            const int& N = shape[0];
+            const int& M = shape[1];
+            if (axis == 0){
+                std::vector<Type> mean_row_vector; 
+                for (int j = 0; j < M; j++){
+                    double sum_of_column = 0;
+                    for (int i = 0; i < N; i++){
+                        sum_of_column += tensor[j + M * i];
+                    }
+                    mean_row_vector.push_back(sum_of_column / N);
+                }
+                std::vector<int> new_shape = {1, M};
+                return Tensor(mean_row_vector, new_shape);
+            } 
+            else if (axis == 1){
+                std::vector<Type> mean_column_vector; 
+                for (int i = 0; i < N; i++){
+                    double sum_of_column = 0;
+                    for (int j = 0; j < M; j++){
+                        sum_of_column += tensor[j + M * i];
+                    }
+                    mean_column_vector.push_back(sum_of_column / M);
+                }
+                std::vector<int> new_shape = {1, N};
+                return Tensor(mean_column_vector, new_shape);
+            } 
+            else {
+                throw std::invalid_argument("Invalid axis: any input must be 0 or 1.");
+            }
+        }
+
         double var(){
             double result = 0;
             for (double component : tensor){
