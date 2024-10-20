@@ -91,17 +91,26 @@ class Tensor{
             std::reverse(shape.begin(), shape.end());
             return *this;
         }
-        double sum(){
-            double result = 0;
-            for (double component : tensor){
+
+        Tensor pow(const double& exponent){
+            std::vector<Type> result;
+            for (Type component : tensor){
+                result.push_back(std::pow(component, exponent));
+            }
+            return Tensor(result, shape);
+        }
+
+        Type sum(){
+            Type result = 0;
+            for (Type component : tensor){
                 result += component;
             }
             return result;
         }
 
-        double mean(){
-            double result = 0;
-            for (double component : tensor){
+        Type mean(){
+            Type result = 0;
+            for (Type component : tensor){
                 result += component;
             }
             return result / tensor.size();
@@ -125,11 +134,11 @@ class Tensor{
             else if (axis == 1){
                 std::vector<Type> mean_column_vector; 
                 for (int i = 0; i < N; i++){
-                    double sum_of_column = 0;
+                    double sum_of_row = 0;
                     for (int j = 0; j < M; j++){
-                        sum_of_column += tensor[j + M * i];
+                        sum_of_row += tensor[j + M * i];
                     }
-                    mean_column_vector.push_back(sum_of_column / M);
+                    mean_column_vector.push_back(sum_of_row / M);
                 }
                 std::vector<int> new_shape = {1, N};
                 return Tensor(mean_column_vector, new_shape);
@@ -139,17 +148,59 @@ class Tensor{
             }
         }
 
-        double var(){
-            double result = 0;
-            for (double component : tensor){
+        Type var(){
+            Type result = 0;
+            for (Type component : tensor){
                 result += std::pow((component - (*this).mean()), 2);
             }
             return result / (tensor.size() - 1);
         }
 
-        double std(){
+        Tensor var(const int& axis){
+            const int N = shape[0];
+            const int M = shape[1];
+            if (axis == 0){
+                std::vector<Type> vector_of_vars;
+                for (int j = 0; j < M; j++){
+                double total_var = 0;
+                    for (int i = 0; i < N; i++){
+                        total_var += std::pow((tensor[j + M * i]) - (*this).mean(0).tensor[j], 2);
+                    }
+                vector_of_vars.push_back(total_var / (N-1));
+                }
+                std::vector<int> new_shape = {1, M};
+                return Tensor(vector_of_vars, new_shape);
+            }
+            else if (axis == 1){
+                std::vector<Type> vector_of_vars;
+                for (int i = 0; i < N; i++){
+                double total_var = 0;
+                    for (int j = 0; j < M; j++){
+                        total_var += std::pow((tensor[j + M * i]) - (*this).mean(1).tensor[i], 2);
+                    }
+                vector_of_vars.push_back(total_var / (M-1));
+                }
+                std::vector<int> new_shape = {1, N};
+                return Tensor(vector_of_vars, new_shape);
+            }
+            else {
+                throw std::invalid_argument("Invalid axis: any input must be 0 or 1.");
+            }
+        }
+
+        Type std(){
             return std::pow((*this).var(), 0.5);
         }
+
+        Tensor std(const int& axis){
+            if (axis == 0 or axis == 1){
+                return (*this).var(axis).pow(0.5);
+            }
+            else {
+                throw std::invalid_argument("Invalid axis: any input must be 0 or 1.");
+            }
+        }
+
 };
 
 int main(){
