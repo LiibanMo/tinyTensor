@@ -129,16 +129,13 @@ class Tensor{
         }
 
         Type mean(){
-            Type result = 0;
-            for (Type component : tensor){
-                result += component;
-            }
+            Type result = (*this).sum();
             return result / tensor.size();
         }
         
         Tensor mean(const int& axis){
-            const int& N = tensor_shape[0];
-            const int& M = tensor_shape[1];
+            const int& N = tensor_shape[tensor_shape.size() - 2];
+            const int& M = tensor_shape[tensor_shape.size() - 1];
             if (axis == 0){
                 std::vector<Type> mean_row_vector; 
                 for (int j = 0; j < M; j++){
@@ -169,6 +166,8 @@ class Tensor{
         }
 
         Type var(){
+            assert(tensor.size() > 1); // condition for calculating sample variance.
+
             Type result = 0;
             for (Type component : tensor){
                 result += std::pow((component - (*this).mean()), 2);
@@ -177,8 +176,11 @@ class Tensor{
         }
 
         Tensor var(const int& axis){
-            const int N = tensor_shape[0];
-            const int M = tensor_shape[1];
+            const int N = tensor_shape[tensor_shape.size() - 2];
+            const int M = tensor_shape[tensor_shape.size() - 1];
+
+            assert(N > 1); // condition for calculating sample variance.
+
             if (axis == 0){
                 std::vector<Type> vector_of_vars;
                 for (int j = 0; j < M; j++){
@@ -192,6 +194,8 @@ class Tensor{
                 return Tensor(vector_of_vars, new_shape);
             }
             else if (axis == 1){
+                assert(M > 1); // condition for calculating sample variance.
+
                 std::vector<Type> vector_of_vars;
                 for (int i = 0; i < N; i++){
                 double total_var = 0;
