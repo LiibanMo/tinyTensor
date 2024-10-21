@@ -1,8 +1,8 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <cassert>
 
 template <typename Type>
 class Tensor{
@@ -86,6 +86,13 @@ class Tensor{
         }
 
         // Methods
+
+        Tensor T(){ // Performs the transpose of the tensor.
+            const int temp = shape[0];
+            shape[0] = shape[1];
+            shape[1] = temp;
+            return *this;
+        }
 
         Tensor pow(const double& exponent){
             std::vector<Type> result;
