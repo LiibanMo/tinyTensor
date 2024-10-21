@@ -13,8 +13,8 @@ class Tensor{
         Tensor(const std::vector<Type>& input_data, const std::vector<int>& input_shape) : tensor(input_data), tensor_shape(input_shape) {}
         
         void print(){
-            const int N = tensor_shape[0];
-            const int M = tensor_shape[1];
+            const int N = tensor_shape[tensor_shape.size() - 2];
+            const int M = tensor_shape[tensor_shape.size() - 1];
 
             std::cout << "{";
             for (int i = 0; i < N; i++){
@@ -45,6 +45,9 @@ class Tensor{
         }
 
         Tensor operator- (const Tensor& other_tensor){
+            assert(tensor.size() ==  other_tensor.tensor.size());
+            assert(tensor_shape == other_tensor.tensor_shape);
+
             std::vector<Type> result;
             for (int i = 0; i < tensor.size(); i++){
                 result.push_back(tensor[i] - other_tensor.tensor[i]);
@@ -61,8 +64,8 @@ class Tensor{
         }
 
         Tensor operator* (const Tensor& other_tensor){
-            const int N = tensor_shape[0];
-            const int M = tensor_shape[1];
+            const int N = tensor_shape[tensor_shape.size() - 2];
+            const int M = tensor_shape[tensor_shape.size() - 1];
             const int P = other_tensor.tensor_shape[1];
 
             std::vector<Type> result_tensor;
@@ -100,10 +103,13 @@ class Tensor{
         }
 
         Tensor T(){ // Performs the transpose of the tensor.
-            const int temp = tensor_shape[0];
-            tensor_shape[0] = tensor_shape[1];
-            tensor_shape[1] = temp;
-            return *this;
+            Tensor transposed_tensor = *this; // making a copy of the tensor
+
+            const int temp = transposed_tensor.tensor_shape[transposed_tensor.tensor_shape.size() - 2];
+            transposed_tensor.tensor_shape[transposed_tensor.tensor_shape.size() - 2] = transposed_tensor.tensor_shape[transposed_tensor.tensor_shape.size() - 1];
+            transposed_tensor.tensor_shape[transposed_tensor.tensor_shape.size() - 1] = temp;
+
+            return transposed_tensor;
         }
 
         Tensor pow(const double& exponent){
@@ -226,7 +232,9 @@ int main(){
     Tensor tensor1(data1, shape1);
     Tensor tensor2(data2, shape2);
 
-    (tensor1 + tensor2).shape();
+    tensor1.shape();
+    tensor1.T().shape();
+    tensor1.shape();
 
     return 0;
 }
