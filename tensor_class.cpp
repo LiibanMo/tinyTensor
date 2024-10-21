@@ -224,17 +224,5 @@ class Tensor{
 };
 
 int main(){
-    std::vector<double> data1 = {1,2,3,4,5,6};
-    std::vector<int> shape1 = {2, 3};
-    std::vector<double> data2 = {1,1,1,1,1,1};
-    std::vector<int> shape2 = {2, 3};
-
-    Tensor tensor1(data1, shape1);
-    Tensor tensor2(data2, shape2);
-
-    tensor1.shape();
-    tensor1.T().shape();
-    tensor1.shape();
-
     return 0;
 }
