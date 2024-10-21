@@ -8,13 +8,13 @@ template <typename Type>
 class Tensor{
     private:
         const std::vector<Type> tensor;
-        std::vector<int> shape;
+        std::vector<int> tensor_shape;
     public:
-        Tensor(const std::vector<Type>& input_data, const std::vector<int>& input_shape) : tensor(input_data), shape(input_shape) {}
+        Tensor(const std::vector<Type>& input_data, const std::vector<int>& input_shape) : tensor(input_data), tensor_shape(input_shape) {}
         
         void print(){
-            const int N = shape[0];
-            const int M = shape[1];
+            const int N = tensor_shape[0];
+            const int M = tensor_shape[1];
 
             std::cout << "{";
             for (int i = 0; i < N; i++){
@@ -34,11 +34,14 @@ class Tensor{
         // Defining operators
 
         Tensor operator+ (const Tensor& other_tensor){
+            assert(tensor.size() ==  other_tensor.tensor.size());
+            assert(tensor_shape == other_tensor.tensor_shape);
+
             std::vector<Type> result;
             for (int i = 0; i < tensor.size(); i++){
                 result.push_back(tensor[i] + other_tensor.tensor[i]);
             }
-            return Tensor(result, shape);
+            return Tensor(result, tensor_shape);
         }
 
         Tensor operator- (const Tensor& other_tensor){
@@ -46,7 +49,7 @@ class Tensor{
             for (int i = 0; i < tensor.size(); i++){
                 result.push_back(tensor[i] - other_tensor.tensor[i]);
             }
-            return Tensor(result, shape);
+            return Tensor(result, tensor_shape);
         }
 
         Tensor operator* (const double& multiplier){
@@ -54,13 +57,13 @@ class Tensor{
             for (double component : tensor){
                 result.push_back(component * multiplier);
             }
-            return Tensor(result, shape);
+            return Tensor(result, tensor_shape);
         }
 
         Tensor operator* (const Tensor& other_tensor){
-            const int N = shape[0];
-            const int M = shape[1];
-            const int P = other_tensor.shape[1];
+            const int N = tensor_shape[0];
+            const int M = tensor_shape[1];
+            const int P = other_tensor.tensor_shape[1];
 
             std::vector<Type> result_tensor;
 
@@ -82,15 +85,24 @@ class Tensor{
             for (double component : tensor){
                 result.push_back(component / divisor);
             }
-            return Tensor(result, shape);
+            return Tensor(result, tensor_shape);
         }
 
         // Methods
 
+        void shape(){
+            std::cout << "{ ";
+            std::vector<int>::iterator iter;
+            for (iter = tensor_shape.begin(); iter != tensor_shape.end()-1; iter++){
+                std::cout << *iter << ", ";
+            }
+            std::cout << *(iter++) << " }" << "\n";
+        }
+
         Tensor T(){ // Performs the transpose of the tensor.
-            const int temp = shape[0];
-            shape[0] = shape[1];
-            shape[1] = temp;
+            const int temp = tensor_shape[0];
+            tensor_shape[0] = tensor_shape[1];
+            tensor_shape[1] = temp;
             return *this;
         }
 
@@ -99,7 +111,7 @@ class Tensor{
             for (Type component : tensor){
                 result.push_back(std::pow(component, exponent));
             }
-            return Tensor(result, shape);
+            return Tensor(result, tensor_shape);
         }
 
         Type sum(){
@@ -119,8 +131,8 @@ class Tensor{
         }
         
         Tensor mean(const int& axis){
-            const int& N = shape[0];
-            const int& M = shape[1];
+            const int& N = tensor_shape[0];
+            const int& M = tensor_shape[1];
             if (axis == 0){
                 std::vector<Type> mean_row_vector; 
                 for (int j = 0; j < M; j++){
@@ -159,8 +171,8 @@ class Tensor{
         }
 
         Tensor var(const int& axis){
-            const int N = shape[0];
-            const int M = shape[1];
+            const int N = tensor_shape[0];
+            const int M = tensor_shape[1];
             if (axis == 0){
                 std::vector<Type> vector_of_vars;
                 for (int j = 0; j < M; j++){
@@ -206,5 +218,15 @@ class Tensor{
 };
 
 int main(){
+    std::vector<double> data1 = {1,2,3,4,5,6};
+    std::vector<int> shape1 = {2, 3};
+    std::vector<double> data2 = {1,1,1,1,1,1};
+    std::vector<int> shape2 = {2, 3};
+
+    Tensor tensor1(data1, shape1);
+    Tensor tensor2(data2, shape2);
+
+    (tensor1 + tensor2).shape();
+
     return 0;
 }
