@@ -87,11 +87,6 @@ class Tensor{
 
         // Methods
 
-        Tensor T(){
-            std::reverse(shape.begin(), shape.end());
-            return *this;
-        }
-
         Tensor pow(const double& exponent){
             std::vector<Type> result;
             for (Type component : tensor){
