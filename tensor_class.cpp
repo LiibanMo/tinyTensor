@@ -13,25 +13,44 @@ class Tensor{
         Tensor(const std::vector<Type>& input_data, const std::vector<int>& input_shape) : tensor(input_data), tensor_shape(input_shape) {}
         
         void print(){
-            const int N = tensor_shape[tensor_shape.size() - 2];
             const int M = tensor_shape[tensor_shape.size() - 1];
 
-            std::cout << "{";
-            for (int i = 0; i < N; i++){
+            if (tensor_shape.size() == 1){
                 std::cout << "{ ";
-                for (int j = 0; j < M; j++){
-                    std::cout << tensor[j + i * M] << " ";
-                }
-                if (i != N-1){
-                    std::cout << "}" << "\n";
-                } else {
-                    std::cout << "}";
-                }
+                for (Type component : tensor){
+                    std::cout << component << " ";
+                } 
+                std::cout << "}" << "\n";
+                
             }
-            std::cout << "}" << "\n";
+            else if (tensor_shape.size() == 2){
+                const int N = tensor_shape[tensor_shape.size() - 2];
+
+                std::cout << "{";
+                for (int i = 0; i < N; i++){
+                    std::cout << "{ ";
+                    for (int j = 0; j < M; j++){
+                        std::cout << tensor[j + i * M] << " ";
+                    }
+                    if (i != N-1){
+                        std::cout << "}" << "\n";
+                    } else {
+                        std::cout << "}";
+                    }
+                }
+                std::cout << "}" << "\n";
+            }
         }
 
         // Defining operators
+
+        Tensor operator+ (const double& operand){
+            std::vector<Type> result;
+            for (Type component : tensor){
+                result.push_back(component + operand);
+            }
+            return Tensor(result, tensor_shape);
+        }
 
         Tensor operator+ (const Tensor& other_tensor){
             assert(tensor.size() ==  other_tensor.tensor.size());
@@ -51,6 +70,14 @@ class Tensor{
             std::vector<Type> result;
             for (int i = 0; i < tensor.size(); i++){
                 result.push_back(tensor[i] - other_tensor.tensor[i]);
+            }
+            return Tensor(result, tensor_shape);
+        }
+
+        Tensor operator- (const double& operand){
+            std::vector<Type> result;
+            for (Type component : tensor){
+                result.push_back(component - operand);
             }
             return Tensor(result, tensor_shape);
         }
@@ -120,17 +147,16 @@ class Tensor{
             return Tensor(result, tensor_shape);
         }
 
-        Type sum(){
+        Tensor sum(){
             Type result = 0;
             for (Type component : tensor){
                 result += component;
             }
-            return result;
+            return Tensor(std::vector<Type> {result}, std::vector<int> {1});
         }
 
-        Type mean(){
-            Type result = (*this).sum();
-            return result / tensor.size();
+        Tensor mean(){
+            return (*this).sum() / tensor.size();
         }
         
         Tensor mean(const int& axis){
@@ -145,7 +171,7 @@ class Tensor{
                     }
                     mean_row_vector.push_back(sum_of_column / N);
                 }
-                std::vector<int> new_shape = {1, M};
+                std::vector<int> new_shape = {M};
                 return Tensor(mean_row_vector, new_shape);
             } 
             else if (axis == 1){
@@ -157,7 +183,7 @@ class Tensor{
                     }
                     mean_column_vector.push_back(sum_of_row / M);
                 }
-                std::vector<int> new_shape = {1, N};
+                std::vector<int> new_shape = {N};
                 return Tensor(mean_column_vector, new_shape);
             } 
             else {
@@ -165,14 +191,15 @@ class Tensor{
             }
         }
 
-        Type var(){
+        Tensor var(){
             assert(tensor.size() > 1); // condition for calculating sample variance.
 
             Type result = 0;
             for (Type component : tensor){
                 result += std::pow((component - (*this).mean()), 2);
             }
-            return result / (tensor.size() - 1);
+            std::vector<Type> result_tensor = {result / (tensor.size() - 1)};
+            return Tensor(result_tensor, std::vector<int> {1});
         }
 
         Tensor var(const int& axis){
@@ -190,7 +217,7 @@ class Tensor{
                     }
                 vector_of_vars.push_back(total_var / (N-1));
                 }
-                std::vector<int> new_shape = {1, M};
+                std::vector<int> new_shape = {M};
                 return Tensor(vector_of_vars, new_shape);
             }
             else if (axis == 1){
@@ -204,7 +231,7 @@ class Tensor{
                     }
                 vector_of_vars.push_back(total_var / (M-1));
                 }
-                std::vector<int> new_shape = {1, N};
+                std::vector<int> new_shape = {N};
                 return Tensor(vector_of_vars, new_shape);
             }
             else {
@@ -212,8 +239,8 @@ class Tensor{
             }
         }
 
-        Type std(){
-            return std::pow((*this).var(), 0.5);
+        Tensor std(){
+            return pow((*this).var(), 0.5);
         }
 
         Tensor std(const int& axis){
